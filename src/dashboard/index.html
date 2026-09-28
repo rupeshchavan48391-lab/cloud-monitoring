@@ -1,0 +1,2248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>CloudMon AI — Cloud Observability</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #080c14;
+            --sidebar: #0b101a;
+            --panel: #101722;
+            --panel-hover: #141c29;
+            --border: #1d2735;
+
+            --text: #f1f5f9;
+            --muted: #8290a3;
+
+            --blue: #38bdf8;
+            --green: #22c55e;
+            --yellow: #f59e0b;
+            --red: #ef4444;
+            --purple: #a78bfa;
+        }
+
+
+        body {
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            background: var(--bg);
+            color: var(--text);
+
+            min-height: 100vh;
+        }
+
+
+        /* =========================
+           LAYOUT
+        ========================= */
+
+        .app {
+
+            display: flex;
+
+            min-height: 100vh;
+        }
+
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+
+            width: 240px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #0b101a,
+                    #080c14
+                );
+
+            border-right:
+                1px solid var(--border);
+
+            padding: 24px 14px;
+
+            position: fixed;
+
+            top: 0;
+            bottom: 0;
+            left: 0;
+        }
+
+
+        .logo {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 0 10px 30px;
+        }
+
+
+        .logo-icon {
+
+            width: 38px;
+            height: 38px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 11px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #38bdf8,
+                    #6366f1
+                );
+
+            font-size: 20px;
+
+            box-shadow:
+                0 0 25px
+                rgba(56,189,248,0.2);
+        }
+
+
+        .logo-text {
+
+            font-size: 17px;
+
+            font-weight: 700;
+        }
+
+
+        .logo-text span {
+
+            display: block;
+
+            color: var(--muted);
+
+            font-size: 10px;
+
+            font-weight: 400;
+
+            margin-top: 2px;
+        }
+
+
+        .nav-title {
+
+            color: #526174;
+
+            font-size: 10px;
+
+            font-weight: 600;
+
+            letter-spacing: 1.3px;
+
+            text-transform: uppercase;
+
+            padding: 0 12px;
+
+            margin-bottom: 8px;
+        }
+
+
+        .nav-item {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 11px 12px;
+
+            border-radius: 9px;
+
+            margin-bottom: 4px;
+
+            color: var(--muted);
+
+            font-size: 13px;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+
+        .nav-item:hover {
+
+            background: var(--panel);
+
+            color: var(--text);
+        }
+
+
+        .nav-item.active {
+
+            background:
+                rgba(56,189,248,0.10);
+
+            color: var(--blue);
+
+            border:
+                1px solid
+                rgba(56,189,248,0.10);
+        }
+
+
+        .nav-icon {
+
+            width: 18px;
+
+            text-align: center;
+
+            font-size: 15px;
+        }
+
+
+        .sidebar-bottom {
+
+            position: absolute;
+
+            bottom: 22px;
+
+            left: 14px;
+
+            right: 14px;
+
+            border-top:
+                1px solid var(--border);
+
+            padding-top: 16px;
+        }
+
+
+        .instance {
+
+            background: var(--panel);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 10px;
+
+            padding: 12px;
+        }
+
+
+        .instance-label {
+
+            font-size: 10px;
+
+            color: var(--muted);
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+        }
+
+
+        .instance-name {
+
+            font-size: 12px;
+
+            margin-top: 6px;
+
+            color: var(--text);
+        }
+
+
+        .instance-status {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            margin-top: 9px;
+
+            color: var(--green);
+
+            font-size: 10px;
+        }
+
+
+        .dot {
+
+            width: 6px;
+            height: 6px;
+
+            border-radius: 50%;
+
+            background: var(--green);
+        }
+
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+
+            margin-left: 240px;
+
+            width: calc(100% - 240px);
+
+            padding: 28px 32px 40px;
+        }
+
+
+        /* =========================
+           TOPBAR
+        ========================= */
+
+        .topbar {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            margin-bottom: 30px;
+        }
+
+
+        .page-title h1 {
+
+            font-size: 24px;
+
+            letter-spacing: -0.5px;
+        }
+
+
+        .page-title p {
+
+            color: var(--muted);
+
+            font-size: 12px;
+
+            margin-top: 5px;
+        }
+
+
+        .top-actions {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+        }
+
+
+        .live-badge {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            padding: 8px 12px;
+
+            border-radius: 20px;
+
+            border:
+                1px solid
+                rgba(34,197,94,0.18);
+
+            background:
+                rgba(34,197,94,0.06);
+
+            color: #86efac;
+
+            font-size: 11px;
+        }
+
+
+        .live-dot {
+
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: var(--green);
+
+            box-shadow:
+                0 0 10px
+                rgba(34,197,94,0.8);
+        }
+
+
+        .refresh {
+
+            border:
+                1px solid var(--border);
+
+            background: var(--panel);
+
+            color: var(--muted);
+
+            border-radius: 8px;
+
+            padding: 8px 11px;
+
+            cursor: pointer;
+        }
+
+
+        /* =========================
+           KPI CARDS
+        ========================= */
+
+        .kpi-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 15px;
+
+            margin-bottom: 18px;
+        }
+
+
+        .kpi {
+
+            background: var(--panel);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            padding: 18px;
+
+            position: relative;
+
+            overflow: hidden;
+
+            transition: 0.2s;
+        }
+
+
+        .kpi:hover {
+
+            background:
+                var(--panel-hover);
+
+            border-color: #2a394d;
+        }
+
+
+        .kpi-top {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+        }
+
+
+        .kpi-label {
+
+            font-size: 11px;
+
+            color: var(--muted);
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.7px;
+        }
+
+
+        .kpi-icon {
+
+            width: 30px;
+            height: 30px;
+
+            border-radius: 8px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            background: #182230;
+
+            font-size: 13px;
+        }
+
+
+        .kpi-value {
+
+            font-size: 28px;
+
+            font-weight: 700;
+
+            margin-top: 13px;
+
+            letter-spacing: -1px;
+        }
+
+
+        .kpi-footer {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            margin-top: 8px;
+
+            color: var(--muted);
+
+            font-size: 10px;
+        }
+
+
+        .healthy {
+
+            color: var(--green);
+        }
+
+
+        /* =========================
+           GRID
+        ========================= */
+
+        .grid {
+
+            display: grid;
+
+            grid-template-columns:
+                2fr 1fr;
+
+            gap: 15px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .panel {
+
+            background: var(--panel);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            padding: 19px;
+        }
+
+
+        .panel-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 20px;
+        }
+
+
+        .panel-title {
+
+            font-size: 14px;
+
+            font-weight: 600;
+        }
+
+
+        .panel-subtitle {
+
+            font-size: 10px;
+
+            color: var(--muted);
+
+            margin-top: 4px;
+        }
+
+
+        .panel-action {
+
+            font-size: 10px;
+
+            color: var(--blue);
+
+            cursor: pointer;
+        }
+
+
+        /* =========================
+           RESOURCE BARS
+        ========================= */
+
+        .resource {
+
+            margin-bottom: 20px;
+        }
+
+
+        .resource:last-child {
+
+            margin-bottom: 0;
+        }
+
+
+        .resource-head {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            margin-bottom: 8px;
+        }
+
+
+        .resource-name {
+
+            font-size: 11px;
+
+            color: #cbd5e1;
+        }
+
+
+        .resource-value {
+
+            font-size: 11px;
+
+            color: var(--muted);
+        }
+
+
+        .progress {
+
+            height: 7px;
+
+            background: #1b2533;
+
+            border-radius: 10px;
+
+            overflow: hidden;
+        }
+
+
+        .progress-bar {
+
+            height: 100%;
+
+            width: 0%;
+
+            border-radius: 10px;
+
+            transition:
+                width 0.5s ease;
+        }
+
+
+        .cpu {
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #0ea5e9,
+                    #38bdf8
+                );
+        }
+
+
+        .ram {
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #7c3aed,
+                    #a78bfa
+                );
+        }
+
+
+        .disk {
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #d97706,
+                    #fbbf24
+                );
+        }
+
+
+        /* =========================
+           SYSTEM HEALTH
+        ========================= */
+
+        .health-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 10px;
+        }
+
+
+        .health-item {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            padding: 11px;
+
+            background: #0d141f;
+
+            border:
+                1px solid #182231;
+
+            border-radius: 9px;
+        }
+
+
+        .health-left {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+        }
+
+
+        .health-icon {
+
+            width: 26px;
+            height: 26px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            background: #162130;
+
+            border-radius: 7px;
+
+            font-size: 12px;
+        }
+
+
+        .health-name {
+
+            font-size: 11px;
+        }
+
+
+        .health-state {
+
+            font-size: 9px;
+
+            color: var(--green);
+
+            text-transform: uppercase;
+        }
+
+
+        /* =========================
+           AI CENTER
+        ========================= */
+
+        .ai-panel {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #111827,
+                    #101827
+                );
+
+            border:
+                1px solid
+                rgba(167,139,250,0.18);
+        }
+
+
+        .ai-title {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+        }
+
+
+        .ai-icon {
+
+            width: 32px;
+            height: 32px;
+
+            border-radius: 9px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #7c3aed,
+                    #4f46e5
+                );
+
+            box-shadow:
+                0 0 20px
+                rgba(124,58,237,0.2);
+        }
+
+
+        .ai-content {
+
+            margin-top: 17px;
+
+            background: #0b111c;
+
+            border:
+                1px solid #1d2938;
+
+            border-radius: 9px;
+
+            padding: 14px;
+        }
+
+
+        .ai-status {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            color: #c4b5fd;
+
+            font-size: 10px;
+
+            margin-bottom: 9px;
+        }
+
+
+        .ai-message {
+
+            color: var(--muted);
+
+            font-size: 11px;
+
+            line-height: 1.6;
+        }
+
+
+        .ai-button {
+
+            margin-top: 13px;
+
+            width: 100%;
+
+            padding: 9px;
+
+            border: 0;
+
+            border-radius: 8px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #4f46e5,
+                    #7c3aed
+                );
+
+            color: white;
+
+            font-size: 11px;
+
+            cursor: pointer;
+        }
+
+
+        /* =========================
+           ALERTS
+        ========================= */
+
+        .alert-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 9px;
+        }
+
+
+        .alert {
+
+            display: flex;
+
+            gap: 10px;
+
+            padding: 12px;
+
+            border-radius: 9px;
+
+            background: #0d141f;
+
+            border:
+                1px solid #182231;
+        }
+
+
+        .alert-indicator {
+
+            width: 4px;
+
+            border-radius: 5px;
+
+            background: var(--green);
+        }
+
+
+        .alert.warning
+        .alert-indicator {
+
+            background: var(--yellow);
+        }
+
+
+        .alert.critical
+        .alert-indicator {
+
+            background: var(--red);
+        }
+
+
+        .alert-content {
+
+            flex: 1;
+        }
+
+
+        .alert-title {
+
+            font-size: 11px;
+
+            font-weight: 600;
+        }
+
+
+        .alert-time {
+
+            color: #64748b;
+
+            font-size: 9px;
+
+            margin-top: 4px;
+        }
+
+
+        .no-alert {
+
+            text-align: center;
+
+            padding: 20px;
+
+            color: var(--muted);
+
+            font-size: 11px;
+        }
+
+
+        /* =========================
+           ACTIVITY
+        ========================= */
+
+        .activity {
+
+            display: flex;
+
+            flex-direction: column;
+        }
+
+
+        .activity-row {
+
+            display: grid;
+
+            grid-template-columns:
+                70px 20px 1fr;
+
+            align-items: center;
+
+            padding: 11px 0;
+
+            border-bottom:
+                1px solid #182231;
+        }
+
+
+        .activity-row:last-child {
+
+            border-bottom: 0;
+        }
+
+
+        .activity-time {
+
+            color: #64748b;
+
+            font-size: 9px;
+        }
+
+
+        .activity-dot {
+
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: var(--blue);
+        }
+
+
+        .activity-text {
+
+            color: #cbd5e1;
+
+            font-size: 10px;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 1100px) {
+
+            .kpi-grid {
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .grid {
+
+                grid-template-columns: 1fr;
+            }
+        }
+
+
+        @media (max-width: 750px) {
+
+            .sidebar {
+
+                width: 70px;
+            }
+
+            .logo-text,
+            .nav-title,
+            .nav-item span,
+            .instance {
+
+                display: none;
+            }
+
+            .logo {
+
+                justify-content: center;
+
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            .nav-item {
+
+                justify-content: center;
+            }
+
+            .main {
+
+                margin-left: 70px;
+
+                width: calc(100% - 70px);
+
+                padding: 20px;
+            }
+        }
+
+
+        @media (max-width: 550px) {
+
+            .kpi-grid {
+
+                grid-template-columns: 1fr;
+            }
+
+            .topbar {
+
+                align-items: flex-start;
+            }
+
+            .live-badge {
+
+                display: none;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                ☁
+            </div>
+
+            <div class="logo-text">
+
+                CloudMon AI
+
+                <span>
+                    Cloud Intelligence
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="nav-title">
+            Monitoring
+        </div>
+
+
+        <div class="nav-item active">
+
+            <div class="nav-icon">
+                ◈
+            </div>
+
+            <span>
+                Overview
+            </span>
+
+        </div>
+
+
+        <div class="nav-item">
+
+            <div class="nav-icon">
+                ◌
+            </div>
+
+            <span>
+                Metrics
+            </span>
+
+        </div>
+
+
+        <div class="nav-item">
+
+            <div class="nav-icon">
+                ⚠
+            </div>
+
+            <span>
+                Incidents
+            </span>
+
+        </div>
+
+
+        <div class="nav-item">
+
+            <div class="nav-icon">
+                ◉
+            </div>
+
+            <span>
+                Alerts
+            </span>
+
+        </div>
+
+
+        <div class="nav-title"
+             style="margin-top:25px">
+
+            Intelligence
+
+        </div>
+
+
+        <div class="nav-item">
+
+            <div class="nav-icon">
+                ✦
+            </div>
+
+            <span>
+                AI Copilot
+            </span>
+
+        </div>
+
+
+        <div class="nav-item">
+
+            <div class="nav-icon">
+                ⌁
+            </div>
+
+            <span>
+                Anomalies
+            </span>
+
+        </div>
+
+
+        <div class="nav-title"
+             style="margin-top:25px">
+
+            Operations
+
+        </div>
+
+
+        <div class="nav-item">
+
+            <div class="nav-icon">
+                ◫
+            </div>
+
+            <span>
+                Deployments
+            </span>
+
+        </div>
+
+
+        <div class="nav-item">
+
+            <div class="nav-icon">
+                ⚙
+            </div>
+
+            <span>
+                Settings
+            </span>
+
+        </div>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="instance">
+
+                <div class="instance-label">
+                    Active Instance
+                </div>
+
+                <div class="instance-name">
+                    AWS EC2 • cloudmon
+                </div>
+
+                <div class="instance-status">
+
+                    <div class="dot"></div>
+
+                    Connected
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <!-- TOPBAR -->
+
+        <div class="topbar">
+
+            <div class="page-title">
+
+                <h1>
+                    Infrastructure Overview
+                </h1>
+
+                <p>
+                    Real-time cloud health and intelligent monitoring
+                </p>
+
+            </div>
+
+
+            <div class="top-actions">
+
+                <div class="live-badge">
+
+                    <div class="live-dot"></div>
+
+                    LIVE MONITORING
+
+                </div>
+
+
+                <button
+                    class="refresh"
+                    onclick="refreshAll()"
+                >
+                    ↻
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- KPI -->
+
+        <section class="kpi-grid">
+
+
+            <div class="kpi">
+
+                <div class="kpi-top">
+
+                    <div class="kpi-label">
+                        CPU Utilization
+                    </div>
+
+                    <div class="kpi-icon">
+                        ◉
+                    </div>
+
+                </div>
+
+                <div
+                    class="kpi-value"
+                    id="cpuValue"
+                >
+                    --
+                </div>
+
+                <div
+                    class="kpi-footer healthy"
+                    id="cpuState"
+                >
+                    ● Loading
+                </div>
+
+            </div>
+
+
+            <div class="kpi">
+
+                <div class="kpi-top">
+
+                    <div class="kpi-label">
+                        Memory
+                    </div>
+
+                    <div class="kpi-icon">
+                        ▥
+                    </div>
+
+                </div>
+
+                <div
+                    class="kpi-value"
+                    id="memoryValue"
+                >
+                    --
+                </div>
+
+                <div
+                    class="kpi-footer healthy"
+                    id="memoryState"
+                >
+                    ● Loading
+                </div>
+
+            </div>
+
+
+            <div class="kpi">
+
+                <div class="kpi-top">
+
+                    <div class="kpi-label">
+                        Disk Usage
+                    </div>
+
+                    <div class="kpi-icon">
+                        ◫
+                    </div>
+
+                </div>
+
+                <div
+                    class="kpi-value"
+                    id="diskValue"
+                >
+                    --
+                </div>
+
+                <div
+                    class="kpi-footer healthy"
+                    id="diskState"
+                >
+                    ● Loading
+                </div>
+
+            </div>
+
+
+            <div class="kpi">
+
+                <div class="kpi-top">
+
+                    <div class="kpi-label">
+                        System Status
+                    </div>
+
+                    <div class="kpi-icon">
+                        ✓
+                    </div>
+
+                </div>
+
+                <div
+                    class="kpi-value"
+                    style="font-size:20px"
+                    id="systemValue"
+                >
+                    ONLINE
+                </div>
+
+                <div class="kpi-footer healthy">
+                    ● Monitoring active
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- RESOURCE + HEALTH -->
+
+        <section class="grid">
+
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <div class="panel-title">
+                            Resource Utilization
+                        </div>
+
+                        <div class="panel-subtitle">
+                            Current infrastructure load
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="panel-action"
+                    >
+                        Live
+                    </div>
+
+                </div>
+
+
+                <div class="resource">
+
+                    <div class="resource-head">
+
+                        <span class="resource-name">
+                            CPU
+                        </span>
+
+                        <span
+                            class="resource-value"
+                            id="cpuBarValue"
+                        >
+                            --
+                        </span>
+
+                    </div>
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar cpu"
+                            id="cpuBar"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="resource">
+
+                    <div class="resource-head">
+
+                        <span class="resource-name">
+                            Memory
+                        </span>
+
+                        <span
+                            class="resource-value"
+                            id="memoryBarValue"
+                        >
+                            --
+                        </span>
+
+                    </div>
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar ram"
+                            id="memoryBar"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="resource">
+
+                    <div class="resource-head">
+
+                        <span class="resource-name">
+                            Disk
+                        </span>
+
+                        <span
+                            class="resource-value"
+                            id="diskBarValue"
+                        >
+                            --
+                        </span>
+
+                    </div>
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar disk"
+                            id="diskBar"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SYSTEM HEALTH -->
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <div class="panel-title">
+                            System Health
+                        </div>
+
+                        <div class="panel-subtitle">
+                            Core services
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="health-list">
+
+
+                    <div class="health-item">
+
+                        <div class="health-left">
+
+                            <div class="health-icon">
+                                API
+                            </div>
+
+                            <div class="health-name">
+                                FastAPI
+                            </div>
+
+                        </div>
+
+                        <div
+                            class="health-state"
+                            id="apiHealth"
+                        >
+                            ● Online
+                        </div>
+
+                    </div>
+
+
+                    <div class="health-item">
+
+                        <div class="health-left">
+
+                            <div class="health-icon">
+                                DB
+                            </div>
+
+                            <div class="health-name">
+                                PostgreSQL
+                            </div>
+
+                        </div>
+
+                        <div class="health-state">
+                            ● Online
+                        </div>
+
+                    </div>
+
+
+                    <div class="health-item">
+
+                        <div class="health-left">
+
+                            <div class="health-icon">
+                                MON
+                            </div>
+
+                            <div class="health-name">
+                                Monitoring
+                            </div>
+
+                        </div>
+
+                        <div class="health-state">
+                            ● Active
+                        </div>
+
+                    </div>
+
+
+                    <div class="health-item">
+
+                        <div class="health-left">
+
+                            <div class="health-icon">
+                                AI
+                            </div>
+
+                            <div class="health-name">
+                                AI Engine
+                            </div>
+
+                        </div>
+
+                        <div
+                            class="health-state"
+                            style="color:#a78bfa"
+                        >
+                            ◌ Standby
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- AI + ALERTS -->
+
+        <section class="grid">
+
+
+            <!-- AI -->
+
+            <div class="panel ai-panel">
+
+                <div class="panel-header">
+
+                    <div class="ai-title">
+
+                        <div class="ai-icon">
+                            ✦
+                        </div>
+
+                        <div>
+
+                            <div class="panel-title">
+                                AI Incident Center
+                            </div>
+
+                            <div class="panel-subtitle">
+                                Intelligent infrastructure analysis
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="panel-action"
+                    >
+                        AI ENGINE
+                    </div>
+
+                </div>
+
+
+                <div class="ai-content">
+
+                    <div class="ai-status">
+
+                        <span>
+                            ✦
+                        </span>
+
+                        AI analysis engine ready
+
+                    </div>
+
+
+                    <div class="ai-message">
+
+                        No active incident requires
+                        AI investigation.
+
+                        CloudMon is continuously monitoring
+                        infrastructure metrics and will
+                        initiate analysis when an anomaly
+                        is detected.
+
+                    </div>
+
+
+                    <button
+                        class="ai-button"
+                        onclick="alert('AI Copilot will be connected in the AI phase.')"
+                    >
+
+                        ✦ Open AI Copilot
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- ALERTS -->
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <div class="panel-title">
+                            Active Alerts
+                        </div>
+
+                        <div class="panel-subtitle">
+                            Real-time events
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="panel-action"
+                        id="alertCount"
+                    >
+                        0
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="alert-list"
+                    id="alertList"
+                >
+
+                    <div class="no-alert">
+
+                        ✓
+
+                        <br><br>
+
+                        No active alerts
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ACTIVITY -->
+
+        <section class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <div class="panel-title">
+                        System Activity
+                    </div>
+
+                    <div class="panel-subtitle">
+                        Latest monitoring events
+                    </div>
+
+                </div>
+
+                <div class="panel-action">
+                    LIVE
+                </div>
+
+            </div>
+
+
+            <div
+                class="activity"
+                id="activity"
+            >
+
+                <div class="activity-row">
+
+                    <div class="activity-time">
+                        --
+                    </div>
+
+                    <div class="activity-dot"></div>
+
+                    <div class="activity-text">
+                        CloudMon monitoring initialized
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<script>
+
+
+    const $ = id =>
+        document.getElementById(id);
+
+
+    function status(value) {
+
+        if (value >= 90)
+            return "CRITICAL";
+
+        if (value >= 80)
+            return "WARNING";
+
+        return "HEALTHY";
+    }
+
+
+    function updateMetric(
+        value,
+        valueElement,
+        stateElement,
+        barElement,
+        barValueElement
+    ) {
+
+        const v =
+            Number(value).toFixed(1);
+
+        valueElement.textContent =
+            v + "%";
+
+        barElement.style.width =
+            Math.min(Number(value), 100) + "%";
+
+        barValueElement.textContent =
+            v + "%";
+
+        const state =
+            status(Number(value));
+
+        stateElement.textContent =
+            "● " + state;
+
+        stateElement.className =
+            "kpi-footer " +
+            (
+                state === "HEALTHY"
+                    ? "healthy"
+                    : ""
+            );
+
+    }
+
+
+    async function loadMetrics() {
+
+        try {
+
+            const response =
+                await fetch("/metrics");
+
+            if (!response.ok)
+                throw new Error();
+
+            const data =
+                await response.json();
+
+
+            updateMetric(
+
+                data.cpu.usage_percent,
+
+                $("cpuValue"),
+
+                $("cpuState"),
+
+                $("cpuBar"),
+
+                $("cpuBarValue")
+
+            );
+
+
+            updateMetric(
+
+                data.memory.usage_percent,
+
+                $("memoryValue"),
+
+                $("memoryState"),
+
+                $("memoryBar"),
+
+                $("memoryBarValue")
+
+            );
+
+
+            updateMetric(
+
+                data.disk.usage_percent,
+
+                $("diskValue"),
+
+                $("diskState"),
+
+                $("diskBar"),
+
+                $("diskBarValue")
+
+            );
+
+
+            $("systemValue")
+                .textContent = "ONLINE";
+
+
+            $("apiHealth")
+                .textContent = "● Online";
+
+
+            addActivity(
+                "Infrastructure metrics updated"
+            );
+
+        }
+
+        catch {
+
+            $("systemValue")
+                .textContent = "OFFLINE";
+
+            $("apiHealth")
+                .textContent = "● Offline";
+
+        }
+
+    }
+
+
+    async function loadAlerts() {
+
+        try {
+
+            const response =
+                await fetch("/alerts");
+
+            if (!response.ok)
+                throw new Error();
+
+            const data =
+                await response.json();
+
+
+            $("alertCount")
+                .textContent =
+                data.alert_count;
+
+
+            const container =
+                $("alertList");
+
+
+            if (data.alert_count === 0) {
+
+                container.innerHTML = `
+
+                    <div class="no-alert">
+
+                        ✓
+
+                        <br><br>
+
+                        No active alerts
+
+                    </div>
+
+                `;
+
+                return;
+
+            }
+
+
+            container.innerHTML =
+                data.alerts
+                    .map(alert => `
+
+                        <div
+                            class="alert ${alert.severity.toLowerCase()}"
+                        >
+
+                            <div
+                                class="alert-indicator"
+                            ></div>
+
+                            <div
+                                class="alert-content"
+                            >
+
+                                <div
+                                    class="alert-title"
+                                >
+
+                                    ${alert.severity}
+                                    ·
+                                    ${alert.metric.toUpperCase()}
+
+                                </div>
+
+                                <div
+                                    class="alert-time"
+                                >
+
+                                    ${alert.message}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    `)
+                    .join("");
+
+        }
+
+        catch {
+
+            $("alertList").innerHTML = `
+
+                <div class="no-alert">
+
+                    Alert service unavailable
+
+                </div>
+
+            `;
+
+        }
+
+    }
+
+
+    function addActivity(message) {
+
+        const container =
+            $("activity");
+
+
+        const now =
+            new Date()
+                .toLocaleTimeString();
+
+
+        const row =
+            document.createElement("div");
+
+
+        row.className =
+            "activity-row";
+
+
+        row.innerHTML = `
+
+            <div class="activity-time">
+                ${now}
+            </div>
+
+            <div class="activity-dot"></div>
+
+            <div class="activity-text">
+                ${message}
+            </div>
+
+        `;
+
+
+        container.prepend(row);
+
+
+        while (
+            container.children.length > 6
+        ) {
+
+            container.removeChild(
+                container.lastChild
+            );
+
+        }
+
+    }
+
+
+    async function refreshAll() {
+
+        await Promise.all([
+
+            loadMetrics(),
+
+            loadAlerts()
+
+        ]);
+
+    }
+
+
+    refreshAll();
+
+
+    setInterval(
+        refreshAll,
+        10000
+    );
+
+
+</script>
+
+
+</body>
+
+</html>
