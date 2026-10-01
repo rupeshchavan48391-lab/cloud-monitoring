@@ -1,3 +1,4 @@
+cloudmon_backup.sql
 .env
 venv/
 __pycache__/

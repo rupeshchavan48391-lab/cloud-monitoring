@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+scrape_configs:
+
+  - job_name: "prometheus"
+    static_configs:
+      - targets:
+          - "prometheus:9090"
+
+  - job_name: "cloudmon"
+    metrics_path: "/metrics/prometheus"
+    static_configs:
+      - targets:
+          - "cloudmon-api:8000"
