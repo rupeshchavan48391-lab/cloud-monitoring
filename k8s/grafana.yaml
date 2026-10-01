@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: grafana
+  namespace: cloudmon
+
+spec:
+
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: grafana
+
+  template:
+
+    metadata:
+      labels:
+        app: grafana
+
+    spec:
+
+      containers:
+
+        - name: grafana
+
+          image: grafana/grafana:12.1.0
+
+          ports:
+            - containerPort: 3000
+
+          resources:
+
+            requests:
+              cpu: "50m"
+              memory: "80Mi"
+
+            limits:
+              cpu: "250m"
+              memory: "160Mi"
+
+          volumeMounts:
+
+            - name: grafana-data
+              mountPath: /var/lib/grafana
+
+      volumes:
+
+        - name: grafana-data
+          emptyDir: {}
+
+
+---
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: grafana
+  namespace: cloudmon
+
+spec:
+
+  selector:
+    app: grafana
+
+  ports:
+
+    - port: 3000
+      targetPort: 3000
+
+  type: ClusterIP

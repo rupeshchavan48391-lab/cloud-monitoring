@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: cloudmon-api
+  namespace: cloudmon
+
+spec:
+
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: cloudmon-api
+
+  template:
+
+    metadata:
+      labels:
+        app: cloudmon-api
+
+    spec:
+
+      containers:
+
+        - name: cloudmon-api
+
+          image: cloudmon-api:latest
+
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8000
+
+          envFrom:
+            - secretRef:
+                name: cloudmon-secret
+
+          resources:
+
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+
+            limits:
+              cpu: "500m"
+              memory: "220Mi"
+
+          readinessProbe:
+
+            httpGet:
+              path: /health
+              port: 8000
+
+            initialDelaySeconds: 10
+            periodSeconds: 15
+
+          livenessProbe:
+
+            httpGet:
+              path: /health
+              port: 8000
+
+            initialDelaySeconds: 20
+            periodSeconds: 30
